@@ -28,6 +28,7 @@
               'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
               'fade-in': 'fadeIn 0.5s ease-out forwards',
               'scale-in': 'scaleIn 0.3s ease-out forwards',
+              'drop': 'drop 1.5s linear infinite',
             },
             keyframes: {
               shake: {
@@ -43,6 +44,10 @@
               scaleIn: {
                 '0%': { opacity: '0', transform: 'scale(0.9)' },
                 '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              drop: {
+                '0%': { transform: 'translateY(-10vh) rotate(0deg)', opacity: '1' },
+                '100%': { transform: 'translateY(110vh) rotate(360deg)', opacity: '0' }
               }
             }
           }
@@ -53,6 +58,15 @@
       body {
         margin: 0;
         background-color: #450a0a; /* red-900 */
+      }
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
       }
     </style>
   <script type="importmap">

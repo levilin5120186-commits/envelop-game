@@ -1,23 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { playLose, playClick } from '../services/soundService';
+import { GAME_OVER_MESSAGES } from '../constants';
 
 interface Props {
   onRestart: () => void;
 }
 
 export const GameOver: React.FC<Props> = ({ onRestart }) => {
+  const [message, setMessage] = useState('');
+
   useEffect(() => {
     // Play sad sound when component mounts
     playLose();
+    // Select a random message
+    const randomMsg = GAME_OVER_MESSAGES[Math.floor(Math.random() * GAME_OVER_MESSAGES.length)];
+    setMessage(randomMsg);
   }, []);
 
   return (
     <div className="h-[100dvh] w-full bg-black flex flex-col items-center justify-center p-8 text-center overflow-hidden">
       <div className="text-8xl mb-8 animate-bounce">💸 👻 💸</div>
       <h1 className="text-5xl font-bold text-gray-300 mb-6">破產</h1>
-      <p className="text-gray-400 mb-10 max-w-2xl text-2xl leading-relaxed font-medium">
-        你玩太大了。親戚們對你搖頭，馬兒也帶著錢跑了。
-        <br/>明年再接再厲！
+      <p className="text-gray-400 mb-10 max-w-2xl text-2xl leading-relaxed font-medium animate-fade-in">
+        {message}
       </p>
       
       <button 
