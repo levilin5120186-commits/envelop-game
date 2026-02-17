@@ -1,0 +1,45 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#450a0a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7f1d1d;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#fbbf24" opacity="0.15"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  <rect width="1200" height="630" fill="url(#pattern)"/>
+  
+  <!-- Outer Border -->
+  <rect x="40" y="40" width="1120" height="550" rx="40" fill="none" stroke="#f59e0b" stroke-width="12"/>
+  <rect x="60" y="60" width="1080" height="510" rx="30" fill="none" stroke="#b45309" stroke-width="4"/>
+
+  <!-- Center Circle Decoration -->
+  <circle cx="600" cy="315" r="220" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.3"/>
+  <circle cx="600" cy="315" r="250" fill="none" stroke="#fbbf24" stroke-width="1" opacity="0.2"/>
+
+  <!-- Main Title -->
+  <text x="600" y="280" font-family="serif" font-weight="bold" font-size="130" text-anchor="middle" fill="#fcd34d" style="text-shadow: 4px 4px 0px #78350f;">
+    富貴險中求
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="400" font-family="sans-serif" font-weight="bold" font-size="70" text-anchor="middle" fill="#fbbf24">
+    🧧 新春紅包挑戰 🧧
+  </text>
+  
+  <!-- Features List -->
+  <g transform="translate(600, 520)" text-anchor="middle" font-family="sans-serif" font-size="36" fill="#fca5a5">
+    <text x="0" y="0">AI 毒舌阿姨 &bull; 馬年骰子樂 &bull; 周公解夢</text>
+  </g>
+  
+  <!-- Decorative Coins -->
+  <circle cx="150" cy="150" r="40" fill="#fbbf24" opacity="0.8"/>
+  <rect x="135" y="135" width="30" height="30" fill="#450a0a"/>
+  
+  <circle cx="1050" cy="480" r="50" fill="#fbbf24" opacity="0.8"/>
+  <rect x="1030" y="460" width="40" height="40" fill="#450a0a"/>
+</svg>
