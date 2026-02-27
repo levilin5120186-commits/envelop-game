@@ -5,15 +5,8 @@ const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
 
 // --- Configuration ---
-
-// Models to try in order. If one fails (e.g., rate limit), the next will be used.
-// Prioritizing Gemini 3 series (Pro then Flash), falling back to 2.5 series.
-const MODELS = [
-  'gemini-3-pro-preview',
-  'gemini-3-flash-preview',
-  'gemini-2.5-pro-latest',
-  'gemini-2.5-flash-latest'
-];
+// Fixed model as requested: Gemini 3 Flash
+const MODEL_NAME = 'gemini-3-flash-preview';
 
 // --- Schemas ---
 
@@ -88,37 +81,26 @@ const relativeJudgeSchema: Schema = {
 
 // --- Helper Functions ---
 
-/**
- * Attempts to generate content using a list of models.
- * If the primary model fails (e.g. rate limit), it tries the next one.
- */
-async function generateWithFallback(prompt: string, schema: Schema): Promise<string> {
-  let lastError: any = null;
+async function generateContent(prompt: string, schema: Schema): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
 
-  for (const modelName of MODELS) {
-    try {
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: schema,
-        },
-      });
-
-      const text = response.text;
-      if (text) {
-        return text;
-      }
-    } catch (error) {
-      console.warn(`Gemini Model [${modelName}] failed. Switching to next...`, error);
-      lastError = error;
-      // Continue loop to try next model
+    const text = response.text;
+    if (!text) {
+      throw new Error("No response text returned from AI.");
     }
+    return text;
+  } catch (error) {
+    console.error(`Gemini Model [${MODEL_NAME}] failed:`, error);
+    throw error;
   }
-
-  // If we reach here, all models failed
-  throw lastError || new Error("All AI models failed to respond.");
 }
 
 // --- Exported Functions ---
@@ -134,10 +116,9 @@ export const judgeResponse = async (question: string, userAnswer: string): Promi
       請以 JSON 格式回覆評分、評論（繁體中文）與是否過關。
     `;
 
-    const jsonText = await generateWithFallback(prompt, auntieSchema);
+    const jsonText = await generateContent(prompt, auntieSchema);
     return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Gemini Auntie Error (All models failed):", error);
     return { score: 0, comment: "阿姨忙線中，聽不見你說什麼！(連線失敗)", isPass: false };
   }
 };
@@ -154,10 +135,9 @@ export const interpretDream = async (input: string): Promise<DreamResponse> => {
       如果是吉，給予 1.5 到 3.0 的倍率。如果是凶，倍率為 0。
     `;
 
-    const jsonText = await generateWithFallback(prompt, dreamSchema);
+    const jsonText = await generateContent(prompt, dreamSchema);
     return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Gemini Dream Error (All models failed):", error);
     return { type: 'BAD', explanation: "天機不可洩漏（連線逾時，請稍後再試）。", multiplier: 0 };
   }
 };
@@ -172,10 +152,9 @@ export const generateRelativeQuestion = async (): Promise<RelativeQuestion> => {
       請不要包含答案。
     `;
 
-    const jsonText = await generateWithFallback(prompt, relativeQuestionSchema);
+    const jsonText = await generateContent(prompt, relativeQuestionSchema);
     return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Gemini Relative Question Error (All models failed):", error);
     return { description: "系統忙碌中：暫時想不起親戚是誰" };
   }
 };
@@ -193,10 +172,9 @@ export const judgeRelativeAnswer = async (question: string, userAnswer: string):
       請給予一個簡短有趣的評論。
     `;
 
-    const jsonText = await generateWithFallback(prompt, relativeJudgeSchema);
+    const jsonText = await generateContent(prompt, relativeJudgeSchema);
     return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Gemini Relative Judge Error (All models failed):", error);
     return { isCorrect: false, correctAnswer: "未知", comment: "阿姨腦袋當機了（連線失敗）" };
   }
 };
