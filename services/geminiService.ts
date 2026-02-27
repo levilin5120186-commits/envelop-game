@@ -1,12 +1,12 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { DreamResponse, RelativeQuestion, RelativeJudgeResponse } from "../types";
+import { DreamResponse } from "../types";
 
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
 
 // --- Configuration ---
-// Fixed model as requested: Gemini 3 Flash
-const MODEL_NAME = 'gemini-3-flash-preview';
+// Fixed model as requested: Gemini 2.5 Flash for speed
+const MODEL_NAME = 'gemini-2.5-flash';
 
 // --- Schemas ---
 
@@ -49,36 +49,6 @@ const dreamSchema: Schema = {
   required: ["type", "explanation", "multiplier"],
 };
 
-const relativeQuestionSchema: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    description: {
-      type: Type.STRING,
-      description: "The description of the relationship (e.g. '爸爸的哥哥').",
-    },
-  },
-  required: ["description"],
-};
-
-const relativeJudgeSchema: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    isCorrect: {
-      type: Type.BOOLEAN,
-      description: "Whether the user's answer is correct.",
-    },
-    correctAnswer: {
-      type: Type.STRING,
-      description: "The correct relative title in Traditional Chinese.",
-    },
-    comment: {
-      type: Type.STRING,
-      description: "A brief comment on the answer.",
-    },
-  },
-  required: ["isCorrect", "correctAnswer", "comment"],
-};
-
 // --- Helper Functions ---
 
 async function generateContent(prompt: string, schema: Schema): Promise<string> {
@@ -114,6 +84,7 @@ export const judgeResponse = async (question: string, userAnswer: string): Promi
       我問了使用者：「${question}」。
       使用者回答：「${userAnswer}」。
       請以 JSON 格式回覆評分、評論（繁體中文）與是否過關。
+      評論請在 200 字以內。
     `;
 
     const jsonText = await generateContent(prompt, auntieSchema);
@@ -133,48 +104,12 @@ export const interpretDream = async (input: string): Promise<DreamResponse> => {
       請根據「馬年」、「發財」、「諧音梗」、「馬到成功」或「民俗迷信」進行幽默解讀。
       判定是吉（賺錢）還是凶（賠錢）。
       如果是吉，給予 1.5 到 3.0 的倍率。如果是凶，倍率為 0。
+      解釋請簡短有力，200 字以內。
     `;
 
     const jsonText = await generateContent(prompt, dreamSchema);
     return JSON.parse(jsonText);
   } catch (error) {
     return { type: 'BAD', explanation: "天機不可洩漏（連線逾時，請稍後再試）。", multiplier: 0 };
-  }
-};
-
-export const generateRelativeQuestion = async (): Promise<RelativeQuestion> => {
-  if (!apiKey) return { description: "API Key Missing (爸爸的爸爸?)" };
-  
-  try {
-    const prompt = `
-      請隨機生成一個華人親戚稱謂的題目描述（繁體中文）。
-      例如：「爸爸的弟弟的妻子」、「媽媽的姐姐的兒子」。
-      請不要包含答案。
-    `;
-
-    const jsonText = await generateContent(prompt, relativeQuestionSchema);
-    return JSON.parse(jsonText);
-  } catch (error) {
-    return { description: "系統忙碌中：暫時想不起親戚是誰" };
-  }
-};
-
-export const judgeRelativeAnswer = async (question: string, userAnswer: string): Promise<RelativeJudgeResponse> => {
-  if (!apiKey) return { isCorrect: false, correctAnswer: "未知", comment: "API Key Missing" };
-
-  try {
-    const prompt = `
-      題目：${question}
-      使用者的回答：${userAnswer}
-      請判斷回答是否正確（繁體中文稱謂）。
-      若是正確，isCorrect 為 true。
-      若不正確，isCorrect 為 false，並提供正確稱謂。
-      請給予一個簡短有趣的評論。
-    `;
-
-    const jsonText = await generateContent(prompt, relativeJudgeSchema);
-    return JSON.parse(jsonText);
-  } catch (error) {
-    return { isCorrect: false, correctAnswer: "未知", comment: "阿姨腦袋當機了（連線失敗）" };
   }
 };
